@@ -115,29 +115,13 @@ h2 {
 }
 
 .category-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(
-    90deg,
-    var(--primary-color),
-    var(--secondary-color)
-  );
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  display: none;
 }
 
 .category-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(98, 0, 238, 0.1);
   border-color: var(--primary-color);
-}
-
-.category-card:hover::before {
-  opacity: 1;
 }
 
 .category-card .material-icons {
