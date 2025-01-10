@@ -91,7 +91,7 @@ h2 {
   text-align: center;
   position: relative;
   min-height: 160px;
-  cursor: move;
+  cursor: pointer;
 }
 
 .category-card::before {
