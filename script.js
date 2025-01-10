@@ -184,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function getFeedbackMessage(score) {
     if (score === 10)
       return {
-        message: "Perfect Score! You're a Quiz Master! 🏆",
+        message: "Is your name Camilla? Because you're perfect! 🥰",
         icon: "emoji_events",
       };
     if (score >= 8)
