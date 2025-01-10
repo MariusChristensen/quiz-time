@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz App</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div id="quiz-container">
+        <h1>Quiz App</h1>
+        <div id="category-container">
+          <select id="category-select" class="category-select">
+            <option value="">Any Category</option>
+            <!-- Categories will be populated from API -->
+          </select>
+        </div>
+        <div id="question-container" class="hide">
+          <p id="question">Question goes here</p>
+          <div id="answer-buttons" class="btn-grid">
+            <!-- Answer buttons will be inserted here -->
+          </div>
+        </div>
+        <div class="controls">
+          <button id="start-btn" class="start-btn btn">Start Quiz</button>
+          <button id="next-btn" class="next-btn btn hide">Next</button>
+        </div>
+        <div id="score-container" class="hide">
+          <p>Your score: <span id="score">0</span></p>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
