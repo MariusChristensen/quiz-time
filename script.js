@@ -251,6 +251,10 @@ document.addEventListener("DOMContentLoaded", () => {
     elements.views.quiz.classList.remove("hide");
     elements.views.score.classList.add("hide");
     elements.buttons.back.classList.remove("hide");
+
+    // Update the quiz view title to show current category
+    document.querySelector("#quiz-view h1").textContent =
+      state.currentCategory.name;
   }
 
   function showScoreView() {
