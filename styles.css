@@ -91,6 +91,7 @@ h2 {
   text-align: center;
   position: relative;
   min-height: 160px;
+  cursor: move;
 }
 
 .category-card::before {
@@ -143,6 +144,28 @@ h2 {
   font-weight: 500;
   font-size: 1rem;
   letter-spacing: 0.3px;
+}
+
+.category-card.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.drag-handle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: #ccc;
+  cursor: move;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* Optional: Hide drag handle on mobile */
+@media (max-width: 768px) {
+  .drag-handle {
+    display: none;
+  }
 }
 
 /* UI Components */
@@ -491,6 +514,48 @@ h2 {
     position: relative;
     top: 0;
     left: 0;
+    margin-bottom: 16px;
+  }
+}
+
+.edit-toggle {
+  margin-bottom: 20px;
+  background-color: var(--surface-color);
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+}
+
+.edit-toggle:hover {
+  background-color: var(--primary-color);
+  color: var(--surface-color);
+}
+
+.drag-handle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: #ccc;
+  cursor: move;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.edit-mode .category-card {
+  cursor: move;
+}
+
+.edit-mode .drag-handle {
+  opacity: 1;
+}
+
+.category-card.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+@media (max-width: 768px) {
+  .edit-toggle {
+    width: 100%;
     margin-bottom: 16px;
   }
 }

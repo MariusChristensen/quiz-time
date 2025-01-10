@@ -126,19 +126,124 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // UI Functions
   function createCategoryCards(categories) {
+    // Add edit mode toggle button
+    if (!document.getElementById("edit-toggle")) {
+      const toggleBtn = document.createElement("button");
+      toggleBtn.id = "edit-toggle";
+      toggleBtn.className = "btn edit-toggle";
+      toggleBtn.innerHTML = `
+            <span class="material-icons">edit</span>
+            <span>Arrange Categories</span>
+        `;
+      toggleBtn.addEventListener("click", toggleEditMode);
+      elements.views.categories.insertBefore(
+        toggleBtn,
+        elements.categoriesGrid
+      );
+    }
+
     elements.categoriesGrid.innerHTML = "";
-    categories.forEach((category) => {
+
+    const savedOrder = JSON.parse(localStorage.getItem("categoryOrder")) || [];
+    const orderedCategories = [...categories].sort((a, b) => {
+      const indexA = savedOrder.indexOf(a.id);
+      const indexB = savedOrder.indexOf(b.id);
+      if (indexA === -1 && indexB === -1) return 0;
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+    });
+
+    orderedCategories.forEach((category) => {
       const card = document.createElement("div");
       card.className = "category-card";
+      card.dataset.categoryId = category.id;
+
       card.innerHTML = `
-                <span class="material-icons">${
-                  categoryIcons[category.id] || "quiz"
-                }</span>
-                <h3>${category.name}</h3>
-            `;
-      card.addEventListener("click", () => startQuiz(category));
+            <span class="material-icons">${
+              categoryIcons[category.id] || "quiz"
+            }</span>
+            <h3>${category.name}</h3>
+            <span class="drag-handle material-icons">drag_indicator</span>
+        `;
+
+      card.addEventListener("click", (e) => {
+        if (!document.body.classList.contains("edit-mode")) {
+          startQuiz(category);
+        }
+      });
+
       elements.categoriesGrid.appendChild(card);
     });
+  }
+
+  function toggleEditMode() {
+    const isEditMode = document.body.classList.toggle("edit-mode");
+    const toggleBtn = document.getElementById("edit-toggle");
+    const cards = document.querySelectorAll(".category-card");
+
+    if (isEditMode) {
+      toggleBtn.innerHTML = `
+            <span class="material-icons">check</span>
+            <span>Done</span>
+        `;
+      cards.forEach((card) => {
+        card.draggable = true;
+        card.addEventListener("dragstart", handleDragStart);
+        card.addEventListener("dragover", handleDragOver);
+        card.addEventListener("drop", handleDrop);
+      });
+    } else {
+      toggleBtn.innerHTML = `
+            <span class="material-icons">edit</span>
+            <span>Arrange Categories</span>
+        `;
+      cards.forEach((card) => {
+        card.draggable = false;
+        card.removeEventListener("dragstart", handleDragStart);
+        card.removeEventListener("dragover", handleDragOver);
+        card.removeEventListener("drop", handleDrop);
+      });
+    }
+  }
+
+  function handleDragStart(e) {
+    e.target.classList.add("dragging");
+    e.dataTransfer.setData("text/plain", e.target.dataset.categoryId);
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    const draggedId = e.dataTransfer.getData("text/plain");
+    const draggedElement = document.querySelector(
+      `[data-category-id="${draggedId}"]`
+    );
+    const dropZone = e.target.closest(".category-card");
+
+    if (draggedElement && dropZone && draggedElement !== dropZone) {
+      // Reorder DOM elements
+      const allCards = [...elements.categoriesGrid.children];
+      const draggedIndex = allCards.indexOf(draggedElement);
+      const dropIndex = allCards.indexOf(dropZone);
+
+      if (draggedIndex < dropIndex) {
+        dropZone.parentNode.insertBefore(draggedElement, dropZone.nextSibling);
+      } else {
+        dropZone.parentNode.insertBefore(draggedElement, dropZone);
+      }
+
+      // Save new order to localStorage
+      const newOrder = [...elements.categoriesGrid.children].map((card) =>
+        parseInt(card.dataset.categoryId)
+      );
+      localStorage.setItem("categoryOrder", JSON.stringify(newOrder));
+    }
+
+    document.querySelector(".dragging")?.classList.remove("dragging");
   }
 
   function showQuestion(question) {
