@@ -5,32 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quiz App</title>
     <link rel="stylesheet" href="styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <div class="container">
-      <div id="quiz-container">
+    <main class="container">
+      <!-- Navigation -->
+      <button id="back-btn" class="back-btn btn hide">
+        <span class="material-icons">arrow_back</span>
+        Back to Categories
+      </button>
+
+      <!-- Categories View -->
+      <section id="categories-view">
+        <h1>Quiz Categories</h1>
+        <div id="categories-grid" class="categories-grid"></div>
+      </section>
+
+      <!-- Quiz View -->
+      <section id="quiz-view" class="hide">
         <h1>Quiz App</h1>
-        <div id="category-container">
-          <select id="category-select" class="category-select">
-            <option value="">Any Category</option>
-            <!-- Categories will be populated from API -->
-          </select>
-        </div>
-        <div id="question-container" class="hide">
-          <p id="question">Question goes here</p>
-          <div id="answer-buttons" class="btn-grid">
-            <!-- Answer buttons will be inserted here -->
+        <div id="loader" class="loader hide"></div>
+
+        <div id="progress-container" class="hide">
+          <div class="progress-bar">
+            <div id="progress" class="progress"></div>
+          </div>
+          <div class="progress-text">
+            Question <span id="current-question">1</span>/<span
+              id="total-questions"
+              >10</span
+            >
           </div>
         </div>
+
+        <div id="question-container" class="hide">
+          <p id="question">Question goes here</p>
+          <div id="answer-buttons" class="btn-grid"></div>
+        </div>
+
         <div class="controls">
-          <button id="start-btn" class="start-btn btn">Start Quiz</button>
-          <button id="next-btn" class="next-btn btn hide">Next</button>
+          <button id="next-btn" class="next-btn btn hide">
+            <span>Next</span>
+            <span class="material-icons">arrow_forward</span>
+          </button>
         </div>
-        <div id="score-container" class="hide">
-          <p>Your score: <span id="score">0</span></p>
+      </section>
+
+      <!-- Score View -->
+      <section id="score-view" class="score-view hide">
+        <h2>Quiz Complete!</h2>
+        <div class="final-score-card">
+          <div class="score-circle">
+            <span id="score">0/10</span>
+            <span class="score-text">points</span>
+          </div>
+          <div class="score-details">
+            <p>Category: <span id="score-category">General Knowledge</span></p>
+          </div>
+          <div class="retry-button-container">
+            <button id="retry-btn" class="btn">
+              <span class="material-icons">replay</span>
+              Try Again
+            </button>
+          </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
     <script src="script.js"></script>
   </body>
 </html>

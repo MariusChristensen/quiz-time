@@ -1,25 +1,35 @@
 # 🎯 Quiz App
 
-A dynamic web-based quiz application that pulls questions from the Open Trivia Database. Test your knowledge across various categories with multiple-choice questions!
+A sleek, Material Design quiz application that pulls questions from the Open Trivia Database. Test your knowledge across various categories with a "Who Wants to Be a Millionaire" style interface!
 
 ## ✨ Features
 
-- 📚 Multiple categories to choose from
-- 🎲 Random questions each time
-- ✅ Immediate feedback on answers
-- 📊 Score tracking
-- 📱 Responsive design for mobile and desktop
-- 🔄 Option to restart and try again
+- 🎨 Modern Material Design UI
+- 📚 24+ Quiz Categories
+- 🎮 "Who Wants to Be a Millionaire" style answer format (A, B, C, D)
+- ✨ Smooth animations and transitions
+- ✅ Immediate feedback with color-coded answers
+- 📊 Progress tracking
+- 🏆 Dynamic score feedback with fun messages
+- 📱 Fully responsive design
+- 🔄 Quick restart option
 
-## 🚀 Live Demo
+## 🎯 Game Features
 
-[Add your live demo link here]
+- 10 questions per quiz
+- Multiple choice questions (4 options)
+- Real-time progress tracking
+- Animated score reveal
+- Personalized feedback based on score
+- Category-specific icons
 
 ## 🛠️ Built With
 
 - HTML5
-- CSS3
-- JavaScript
+- CSS3 (with CSS Variables)
+- Vanilla JavaScript
+- Material Icons
+- Roboto Font
 - [Open Trivia Database API](https://opentdb.com/)
 
 ## 🏃‍♂️ Getting Started
@@ -27,7 +37,7 @@ A dynamic web-based quiz application that pulls questions from the Open Trivia D
 1. Clone the repository
 
    ```bash
-   git clone https://github.com/your-username/quiz-app.git
+   git clone https://github.com/MariusChristensen/quiz-time/
    ```
 
 2. Navigate to the project directory
@@ -38,15 +48,17 @@ A dynamic web-based quiz application that pulls questions from the Open Trivia D
 
 3. Open `index.html` in your browser
 
-That's it! No build process or dependencies required.
+No build process or dependencies required!
 
-## 📱 Screenshots
+## 🎮 How to Play
 
-[Add your screenshots here]
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](link-to-issues).
+1. Select a category from the main menu
+2. Read each question carefully
+3. Choose your answer from the A, B, C, D options
+4. Get immediate feedback on your answer
+5. Click "Next" to proceed
+6. View your final score and feedback
+7. Try again to beat your score!
 
 ## 📝 License
 
@@ -54,9 +66,9 @@ This project is [MIT](LICENSE) licensed.
 
 ## 👤 Author
 
-**Your Name**
+**Marius Christensen**
 
-- GitHub: [@your-github-username](https://github.com/your-github-username)
+- GitHub: [@MariusChristensen](https://github.com/MariusChristensen)
 
 ## 🌟 Show your support
 

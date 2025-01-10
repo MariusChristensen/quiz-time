@@ -1,57 +1,214 @@
-let currentQuestionIndex = 0;
-let score = 0;
-let questions = [];
-
 document.addEventListener("DOMContentLoaded", () => {
-  const startButton = document.getElementById("start-btn");
-  const nextButton = document.getElementById("next-btn");
-  const questionContainer = document.getElementById("question-container");
-  const questionElement = document.getElementById("question");
-  const answerButtonsElement = document.getElementById("answer-buttons");
-  const scoreElement = document.getElementById("score");
-  const scoreContainer = document.getElementById("score-container");
-  const categorySelect = document.getElementById("category-select");
+  // DOM Elements
+  const elements = {
+    views: {
+      categories: document.getElementById("categories-view"),
+      quiz: document.getElementById("quiz-view"),
+      score: document.getElementById("score-view"),
+    },
+    buttons: {
+      back: document.getElementById("back-btn"),
+      next: document.getElementById("next-btn"),
+      retry: document.getElementById("retry-btn"),
+    },
+    quiz: {
+      container: document.getElementById("question-container"),
+      question: document.getElementById("question"),
+      answerButtons: document.getElementById("answer-buttons"),
+      loader: document.getElementById("loader"),
+      progress: {
+        bar: document.getElementById("progress"),
+        container: document.getElementById("progress-container"),
+        current: document.getElementById("current-question"),
+        total: document.getElementById("total-questions"),
+      },
+    },
+    score: {
+      final: document.getElementById("score"),
+      category: document.getElementById("score-category"),
+    },
+    categoriesGrid: document.getElementById("categories-grid"),
+  };
 
-  startButton.addEventListener("click", startQuiz);
-  nextButton.addEventListener("click", () => {
-    currentQuestionIndex++;
-    setNextQuestion();
-  });
+  // Game State
+  const state = {
+    currentQuestionIndex: 0,
+    score: 0,
+    questions: [],
+    currentCategory: null,
+  };
 
+  // Category Icons Mapping
+  const categoryIcons = {
+    9: "public", // General Knowledge
+    10: "menu_book", // Books
+    11: "movies", // Film
+    12: "music_note", // Music
+    13: "theater_comedy", // Musicals & Theatres
+    14: "tv", // Television
+    15: "videogame_asset", // Video Games
+    16: "casino", // Board Games
+    17: "science", // Science & Nature
+    18: "computer", // Computers
+    19: "calculate", // Mathematics
+    20: "auto_stories", // Mythology
+    21: "sports_soccer", // Sports
+    22: "terrain", // Geography
+    23: "history", // History
+    24: "policy", // Politics
+    25: "palette", // Art
+    26: "people", // Celebrities
+    27: "pets", // Animals
+    28: "directions_car", // Vehicles
+    29: "book", // Comics
+    30: "devices", // Science: Gadgets
+    31: "emoji_events", // Japanese Anime & Manga
+    32: "animation", // Cartoon & Animations
+  };
+
+  // Event Listeners
+  function initializeEventListeners() {
+    elements.buttons.back.addEventListener("click", showCategories);
+    elements.buttons.next.addEventListener("click", () => {
+      state.currentQuestionIndex++;
+      setNextQuestion();
+    });
+    elements.buttons.retry.addEventListener("click", () => {
+      state.currentCategory
+        ? startQuiz(state.currentCategory)
+        : showCategories();
+    });
+  }
+
+  // API Functions
   async function fetchCategories() {
     try {
+      showLoader();
       const response = await fetch("https://opentdb.com/api_category.php");
+      if (!response.ok) throw new Error("Failed to fetch categories");
       const data = await response.json();
-      data.trivia_categories.forEach((category) => {
-        const option = document.createElement("option");
-        option.value = category.id;
-        option.textContent = category.name;
-        categorySelect.appendChild(option);
-      });
+      createCategoryCards(data.trivia_categories);
     } catch (error) {
       console.error("Error fetching categories:", error);
+      // Could add user-facing error message here
+    } finally {
+      hideLoader();
     }
   }
 
-  async function startQuiz() {
-    startButton.classList.add("hide");
-    scoreContainer.classList.add("hide");
+  async function startQuiz(category) {
+    try {
+      state.currentCategory = category;
+      showLoader();
+      showQuizView();
 
-    let apiUrl = "https://opentdb.com/api.php?amount=10&type=multiple";
-    const selectedCategory = categorySelect.value;
-    if (selectedCategory) {
-      apiUrl += `&category=${selectedCategory}`;
+      const apiUrl = `https://opentdb.com/api.php?amount=10&category=${category.id}&type=multiple`;
+      const response = await fetch(apiUrl);
+      if (!response.ok) throw new Error("Failed to fetch questions");
+      const data = await response.json();
+
+      state.questions = data.results.map(formatQuestion);
+      state.currentQuestionIndex = 0;
+      state.score = 0;
+
+      elements.quiz.container.classList.remove("hide");
+      elements.quiz.progress.container.classList.remove("hide");
+      elements.quiz.progress.total.textContent = state.questions.length;
+      updateProgress();
+      setNextQuestion();
+    } catch (error) {
+      console.error("Error starting quiz:", error);
+      // Could add user-facing error message here
+    } finally {
+      hideLoader();
     }
-
-    const response = await fetch(apiUrl);
-    const data = await response.json();
-    questions = data.results.map(formatQuestion);
-    currentQuestionIndex = 0;
-    score = 0;
-    questionContainer.classList.remove("hide");
-    setNextQuestion();
   }
 
+  // UI Functions
+  function createCategoryCards(categories) {
+    elements.categoriesGrid.innerHTML = "";
+    categories.forEach((category) => {
+      const card = document.createElement("div");
+      card.className = "category-card";
+      card.innerHTML = `
+                <span class="material-icons">${
+                  categoryIcons[category.id] || "quiz"
+                }</span>
+                <h3>${category.name}</h3>
+            `;
+      card.addEventListener("click", () => startQuiz(category));
+      elements.categoriesGrid.appendChild(card);
+    });
+  }
+
+  function showQuestion(question) {
+    elements.quiz.question.innerText = question.question;
+    const letters = ["A", "B", "C", "D"];
+
+    question.answers.forEach((answer, index) => {
+      const button = document.createElement("button");
+      button.innerText = answer;
+      button.classList.add("btn");
+      button.setAttribute("data-letter", letters[index]);
+      button.addEventListener("click", selectAnswer);
+      elements.quiz.answerButtons.appendChild(button);
+    });
+  }
+
+  function selectAnswer(e) {
+    const selectedButton = e.target;
+    const correct =
+      selectedButton.innerText ===
+      state.questions[state.currentQuestionIndex].correctAnswer;
+
+    if (correct) state.score++;
+
+    setStatusClass(selectedButton, correct);
+    Array.from(elements.quiz.answerButtons.children).forEach((button) => {
+      button.disabled = true;
+      if (
+        button.innerText ===
+        state.questions[state.currentQuestionIndex].correctAnswer
+      ) {
+        setStatusClass(button, true);
+      }
+    });
+
+    if (state.currentQuestionIndex < state.questions.length - 1) {
+      elements.buttons.next.classList.remove("hide");
+    } else {
+      setTimeout(showScoreView, 1000);
+    }
+  }
+
+  function getFeedbackMessage(score) {
+    if (score === 10)
+      return {
+        message: "Perfect Score! You're a Quiz Master! 🏆",
+        icon: "emoji_events",
+      };
+    if (score >= 8)
+      return {
+        message: "Excellent Work! Nearly Perfect! 🌟",
+        icon: "stars",
+      };
+    if (score >= 6)
+      return {
+        message: "Good Job! Above Average! 👍",
+        icon: "thumb_up",
+      };
+    if (score >= 4)
+      return {
+        message: "Not Bad! Keep Practicing! 💪",
+        icon: "fitness_center",
+      };
+    return {
+      message: "Hey buddy, are you ok? 😅",
+      icon: "sentiment_very_dissatisfied",
+    };
+  }
+
+  // Utility Functions
   function formatQuestion(question) {
     return {
       question: decodeHTML(question.question),
@@ -62,72 +219,103 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  function setNextQuestion() {
-    resetState();
-    if (currentQuestionIndex < questions.length) {
-      showQuestion(questions[currentQuestionIndex]);
-    } else {
-      endQuiz();
-    }
-  }
-
-  function showQuestion(question) {
-    questionElement.innerText = question.question;
-    question.answers.forEach((answer) => {
-      const button = document.createElement("button");
-      button.innerText = answer;
-      button.classList.add("btn");
-      button.addEventListener("click", selectAnswer);
-      answerButtonsElement.appendChild(button);
-    });
-  }
-
-  function resetState() {
-    nextButton.classList.add("hide");
-    while (answerButtonsElement.firstChild) {
-      answerButtonsElement.removeChild(answerButtonsElement.firstChild);
-    }
-  }
-
-  function selectAnswer(e) {
-    const selectedButton = e.target;
-    const correct =
-      selectedButton.innerText ===
-      questions[currentQuestionIndex].correctAnswer;
-
-    if (correct) score++;
-
-    setStatusClass(selectedButton, correct);
-    Array.from(answerButtonsElement.children).forEach((button) => {
-      button.disabled = true;
-    });
-
-    if (currentQuestionIndex < questions.length - 1) {
-      nextButton.classList.remove("hide");
-    } else {
-      startButton.innerText = "Restart";
-      startButton.classList.remove("hide");
-    }
-  }
-
-  function setStatusClass(element, correct) {
-    element.classList.add(correct ? "correct" : "wrong");
-  }
-
-  function endQuiz() {
-    questionContainer.classList.add("hide");
-    startButton.innerText = "Restart";
-    startButton.classList.remove("hide");
-    scoreContainer.classList.remove("hide");
-    scoreElement.innerText = `${score} out of ${questions.length}`;
-  }
-
-  // Helper function to decode HTML entities
   function decodeHTML(html) {
     const txt = document.createElement("textarea");
     txt.innerHTML = html;
     return txt.value;
   }
 
+  function setStatusClass(element, correct) {
+    element.classList.add(correct ? "correct" : "wrong");
+  }
+
+  function resetState() {
+    elements.buttons.next.classList.add("hide");
+    while (elements.quiz.answerButtons.firstChild) {
+      elements.quiz.answerButtons.removeChild(
+        elements.quiz.answerButtons.firstChild
+      );
+    }
+  }
+
+  // View Management
+  function showCategories() {
+    elements.views.categories.classList.remove("hide");
+    elements.views.quiz.classList.add("hide");
+    elements.views.score.classList.add("hide");
+    elements.buttons.back.classList.add("hide");
+  }
+
+  function showQuizView() {
+    elements.views.categories.classList.add("hide");
+    elements.views.quiz.classList.remove("hide");
+    elements.views.score.classList.add("hide");
+    elements.buttons.back.classList.remove("hide");
+  }
+
+  function showScoreView() {
+    elements.views.categories.classList.add("hide");
+    elements.views.quiz.classList.add("hide");
+    elements.views.score.classList.remove("hide");
+    elements.buttons.back.classList.remove("hide");
+
+    const feedback = getFeedbackMessage(state.score);
+
+    elements.views.score.innerHTML = `
+        <h2>${state.currentCategory.name}</h2>
+        <div class="final-score-card">
+            <div class="score-circle">
+                <span id="score">${state.score}/10</span>
+                <span class="score-text">points</span>
+            </div>
+            <div class="score-details">
+                <div class="feedback">
+                    <span class="material-icons">${feedback.icon}</span>
+                    <p class="feedback-message">${feedback.message}</p>
+                </div>
+            </div>
+            <div class="retry-button-container">
+                <button id="retry-btn" class="btn">
+                    <span class="material-icons">replay</span>
+                    Try Again
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.getElementById("retry-btn").addEventListener("click", () => {
+      startQuiz(state.currentCategory);
+    });
+
+    elements.views.score.classList.add("fade-in");
+  }
+
+  function setNextQuestion() {
+    resetState();
+    if (state.currentQuestionIndex < state.questions.length) {
+      showQuestion(state.questions[state.currentQuestionIndex]);
+      updateProgress();
+    } else {
+      showScoreView();
+    }
+  }
+
+  function updateProgress() {
+    const progress =
+      ((state.currentQuestionIndex + 1) / state.questions.length) * 100;
+    elements.quiz.progress.bar.style.width = `${progress}%`;
+    elements.quiz.progress.current.textContent = state.currentQuestionIndex + 1;
+  }
+
+  function showLoader() {
+    elements.quiz.loader.classList.remove("hide");
+  }
+
+  function hideLoader() {
+    elements.quiz.loader.classList.add("hide");
+  }
+
+  // Initialize App
+  initializeEventListeners();
   fetchCategories();
 });
