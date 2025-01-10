@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // 1. Core Setup
+  // ----------------------------------------
   // DOM Elements
   const elements = {
     views: {
@@ -66,21 +68,8 @@ document.addEventListener("DOMContentLoaded", () => {
     32: "animation", // Cartoon & Animations
   };
 
-  // Event Listeners
-  function initializeEventListeners() {
-    elements.buttons.back.addEventListener("click", showCategories);
-    elements.buttons.next.addEventListener("click", () => {
-      state.currentQuestionIndex++;
-      setNextQuestion();
-    });
-    elements.buttons.retry.addEventListener("click", () => {
-      state.currentCategory
-        ? startQuiz(state.currentCategory)
-        : showCategories();
-    });
-  }
-
-  // API Functions
+  // 2. Category Management
+  // ----------------------------------------
   async function fetchCategories() {
     try {
       showLoader();
@@ -90,58 +79,13 @@ document.addEventListener("DOMContentLoaded", () => {
       createCategoryCards(data.trivia_categories);
     } catch (error) {
       console.error("Error fetching categories:", error);
-      // Could add user-facing error message here
     } finally {
       hideLoader();
     }
   }
 
-  async function startQuiz(category) {
-    try {
-      state.currentCategory = category;
-      showLoader();
-      showQuizView();
-
-      const apiUrl = `https://opentdb.com/api.php?amount=10&category=${category.id}&type=multiple`;
-      const response = await fetch(apiUrl);
-      if (!response.ok) throw new Error("Failed to fetch questions");
-      const data = await response.json();
-
-      state.questions = data.results.map(formatQuestion);
-      state.currentQuestionIndex = 0;
-      state.score = 0;
-
-      elements.quiz.container.classList.remove("hide");
-      elements.quiz.progress.container.classList.remove("hide");
-      elements.quiz.progress.total.textContent = state.questions.length;
-      updateProgress();
-      setNextQuestion();
-    } catch (error) {
-      console.error("Error starting quiz:", error);
-      // Could add user-facing error message here
-    } finally {
-      hideLoader();
-    }
-  }
-
-  // UI Functions
   function createCategoryCards(categories) {
-    // Add edit mode toggle button
-    if (!document.getElementById("edit-toggle")) {
-      const toggleBtn = document.createElement("button");
-      toggleBtn.id = "edit-toggle";
-      toggleBtn.className = "btn edit-toggle";
-      toggleBtn.innerHTML = `
-            <span class="material-icons">edit</span>
-            <span>Arrange Categories</span>
-        `;
-      toggleBtn.addEventListener("click", toggleEditMode);
-      elements.views.categories.insertBefore(
-        toggleBtn,
-        elements.categoriesGrid
-      );
-    }
-
+    createEditToggle();
     elements.categoriesGrid.innerHTML = "";
 
     const savedOrder = JSON.parse(localStorage.getItem("categoryOrder")) || [];
@@ -160,12 +104,12 @@ document.addEventListener("DOMContentLoaded", () => {
       card.dataset.categoryId = category.id;
 
       card.innerHTML = `
-            <span class="material-icons">${
-              categoryIcons[category.id] || "quiz"
-            }</span>
-            <h3>${category.name}</h3>
-            <span class="drag-handle material-icons">drag_indicator</span>
-        `;
+                <span class="material-icons">${
+                  categoryIcons[category.id] || "quiz"
+                }</span>
+                <h3>${category.name}</h3>
+                <span class="drag-handle material-icons">drag_indicator</span>
+            `;
 
       card.addEventListener("click", (e) => {
         if (!document.body.classList.contains("edit-mode")) {
@@ -177,6 +121,24 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function createEditToggle() {
+    if (!document.getElementById("edit-toggle")) {
+      const toggleBtn = document.createElement("button");
+      toggleBtn.id = "edit-toggle";
+      toggleBtn.className = "btn edit-toggle";
+      toggleBtn.innerHTML = `
+                <span class="material-icons">edit</span>
+                <span>Arrange Categories</span>
+            `;
+      toggleBtn.addEventListener("click", toggleEditMode);
+      elements.views.categories.insertBefore(
+        toggleBtn,
+        elements.categoriesGrid
+      );
+    }
+  }
+
+  // Drag and Drop Functionality
   function toggleEditMode() {
     const isEditMode = document.body.classList.toggle("edit-mode");
     const toggleBtn = document.getElementById("edit-toggle");
@@ -184,27 +146,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (isEditMode) {
       toggleBtn.innerHTML = `
-            <span class="material-icons">check</span>
-            <span>Done</span>
-        `;
-      cards.forEach((card) => {
-        card.draggable = true;
-        card.addEventListener("dragstart", handleDragStart);
-        card.addEventListener("dragover", handleDragOver);
-        card.addEventListener("drop", handleDrop);
-      });
+                <span class="material-icons">check</span>
+                <span>Done</span>
+            `;
+      enableDragAndDrop(cards);
     } else {
       toggleBtn.innerHTML = `
-            <span class="material-icons">edit</span>
-            <span>Arrange Categories</span>
-        `;
-      cards.forEach((card) => {
-        card.draggable = false;
-        card.removeEventListener("dragstart", handleDragStart);
-        card.removeEventListener("dragover", handleDragOver);
-        card.removeEventListener("drop", handleDrop);
-      });
+                <span class="material-icons">edit</span>
+                <span>Arrange Categories</span>
+            `;
+      disableDragAndDrop(cards);
     }
+  }
+
+  function enableDragAndDrop(cards) {
+    cards.forEach((card) => {
+      card.draggable = true;
+      card.addEventListener("dragstart", handleDragStart);
+      card.addEventListener("dragover", handleDragOver);
+      card.addEventListener("drop", handleDrop);
+    });
+  }
+
+  function disableDragAndDrop(cards) {
+    cards.forEach((card) => {
+      card.draggable = false;
+      card.removeEventListener("dragstart", handleDragStart);
+      card.removeEventListener("dragover", handleDragOver);
+      card.removeEventListener("drop", handleDrop);
+    });
   }
 
   function handleDragStart(e) {
@@ -225,25 +195,63 @@ document.addEventListener("DOMContentLoaded", () => {
     const dropZone = e.target.closest(".category-card");
 
     if (draggedElement && dropZone && draggedElement !== dropZone) {
-      // Reorder DOM elements
-      const allCards = [...elements.categoriesGrid.children];
-      const draggedIndex = allCards.indexOf(draggedElement);
-      const dropIndex = allCards.indexOf(dropZone);
-
-      if (draggedIndex < dropIndex) {
-        dropZone.parentNode.insertBefore(draggedElement, dropZone.nextSibling);
-      } else {
-        dropZone.parentNode.insertBefore(draggedElement, dropZone);
-      }
-
-      // Save new order to localStorage
-      const newOrder = [...elements.categoriesGrid.children].map((card) =>
-        parseInt(card.dataset.categoryId)
-      );
-      localStorage.setItem("categoryOrder", JSON.stringify(newOrder));
+      reorderCategories(draggedElement, dropZone);
+      saveNewOrder();
     }
 
     document.querySelector(".dragging")?.classList.remove("dragging");
+  }
+
+  function reorderCategories(draggedElement, dropZone) {
+    const allCards = [...elements.categoriesGrid.children];
+    const draggedIndex = allCards.indexOf(draggedElement);
+    const dropIndex = allCards.indexOf(dropZone);
+
+    if (draggedIndex < dropIndex) {
+      dropZone.parentNode.insertBefore(draggedElement, dropZone.nextSibling);
+    } else {
+      dropZone.parentNode.insertBefore(draggedElement, dropZone);
+    }
+  }
+
+  function saveNewOrder() {
+    const newOrder = [...elements.categoriesGrid.children].map((card) =>
+      parseInt(card.dataset.categoryId)
+    );
+    localStorage.setItem("categoryOrder", JSON.stringify(newOrder));
+  }
+
+  // 3. Quiz Logic
+  // ----------------------------------------
+  async function startQuiz(category) {
+    try {
+      state.currentCategory = category;
+      showLoader();
+      showQuizView();
+
+      const apiUrl = `https://opentdb.com/api.php?amount=10&category=${category.id}&type=multiple`;
+      const response = await fetch(apiUrl);
+      if (!response.ok) throw new Error("Failed to fetch questions");
+      const data = await response.json();
+
+      initializeQuiz(data.results);
+    } catch (error) {
+      console.error("Error starting quiz:", error);
+    } finally {
+      hideLoader();
+    }
+  }
+
+  function initializeQuiz(questions) {
+    state.questions = questions.map(formatQuestion);
+    state.currentQuestionIndex = 0;
+    state.score = 0;
+
+    elements.quiz.container.classList.remove("hide");
+    elements.quiz.progress.container.classList.remove("hide");
+    elements.quiz.progress.total.textContent = state.questions.length;
+    updateProgress();
+    setNextQuestion();
   }
 
   function showQuestion(question) {
@@ -269,6 +277,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (correct) state.score++;
 
     setStatusClass(selectedButton, correct);
+    disableAnswerButtons(correct);
+
+    if (state.currentQuestionIndex < state.questions.length - 1) {
+      elements.buttons.next.classList.remove("hide");
+    } else {
+      setTimeout(showScoreView, 1000);
+    }
+  }
+
+  function disableAnswerButtons(correct) {
     Array.from(elements.quiz.answerButtons.children).forEach((button) => {
       button.disabled = true;
       if (
@@ -278,14 +296,85 @@ document.addEventListener("DOMContentLoaded", () => {
         setStatusClass(button, true);
       }
     });
+  }
 
-    if (state.currentQuestionIndex < state.questions.length - 1) {
-      elements.buttons.next.classList.remove("hide");
+  // 4. View Management
+  // ----------------------------------------
+  function showCategories() {
+    elements.views.categories.classList.remove("hide");
+    elements.views.quiz.classList.add("hide");
+    elements.views.score.classList.add("hide");
+    elements.buttons.back.classList.add("hide");
+  }
+
+  function showQuizView() {
+    elements.views.categories.classList.add("hide");
+    elements.views.quiz.classList.remove("hide");
+    elements.views.score.classList.add("hide");
+    elements.buttons.back.classList.remove("hide");
+    document.querySelector("#quiz-view h1").textContent =
+      state.currentCategory.name;
+  }
+
+  function showScoreView() {
+    elements.views.categories.classList.add("hide");
+    elements.views.quiz.classList.add("hide");
+    elements.views.score.classList.remove("hide");
+    elements.buttons.back.classList.remove("hide");
+
+    const feedback = getFeedbackMessage(state.score);
+    renderScoreView(feedback);
+  }
+
+  function renderScoreView(feedback) {
+    elements.views.score.innerHTML = `
+            <h2>${state.currentCategory.name}</h2>
+            <div class="final-score-card">
+                <div class="score-circle">
+                    <span id="score">${state.score}/10</span>
+                    <span class="score-text">points</span>
+                </div>
+                <div class="score-details">
+                    <div class="feedback">
+                        <span class="material-icons">${feedback.icon}</span>
+                        <p class="feedback-message">${feedback.message}</p>
+                    </div>
+                </div>
+                <div class="retry-button-container">
+                    <button id="retry-btn" class="btn">
+                        <span class="material-icons">replay</span>
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        `;
+
+    document.getElementById("retry-btn").addEventListener("click", () => {
+      startQuiz(state.currentCategory);
+    });
+
+    elements.views.score.classList.add("fade-in");
+  }
+
+  function setNextQuestion() {
+    resetState();
+    if (state.currentQuestionIndex < state.questions.length) {
+      showQuestion(state.questions[state.currentQuestionIndex]);
+      updateProgress();
     } else {
-      setTimeout(showScoreView, 1000);
+      showScoreView();
     }
   }
 
+  function updateProgress() {
+    const progress =
+      ((state.currentQuestionIndex + 1) / state.questions.length) * 100;
+    elements.quiz.progress.bar.style.width = `${progress}%`;
+    elements.quiz.progress.current.textContent = state.currentQuestionIndex + 1;
+  }
+
+  // 5. Utility Functions
+  // ----------------------------------------
   function getFeedbackMessage(score) {
     if (score === 10)
       return {
@@ -313,7 +402,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  // Utility Functions
   function formatQuestion(question) {
     return {
       question: decodeHTML(question.question),
@@ -343,85 +431,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // View Management
-  function showCategories() {
-    elements.views.categories.classList.remove("hide");
-    elements.views.quiz.classList.add("hide");
-    elements.views.score.classList.add("hide");
-    elements.buttons.back.classList.add("hide");
-  }
-
-  function showQuizView() {
-    elements.views.categories.classList.add("hide");
-    elements.views.quiz.classList.remove("hide");
-    elements.views.score.classList.add("hide");
-    elements.buttons.back.classList.remove("hide");
-
-    // Update the quiz view title to show current category
-    document.querySelector("#quiz-view h1").textContent =
-      state.currentCategory.name;
-  }
-
-  function showScoreView() {
-    elements.views.categories.classList.add("hide");
-    elements.views.quiz.classList.add("hide");
-    elements.views.score.classList.remove("hide");
-    elements.buttons.back.classList.remove("hide");
-
-    const feedback = getFeedbackMessage(state.score);
-
-    elements.views.score.innerHTML = `
-        <h2>${state.currentCategory.name}</h2>
-        <div class="final-score-card">
-            <div class="score-circle">
-                <span id="score">${state.score}/10</span>
-                <span class="score-text">points</span>
-            </div>
-            <div class="score-details">
-                <div class="feedback">
-                    <span class="material-icons">${feedback.icon}</span>
-                    <p class="feedback-message">${feedback.message}</p>
-                </div>
-            </div>
-            <div class="retry-button-container">
-                <button id="retry-btn" class="btn">
-                    <span class="material-icons">replay</span>
-                    Try Again
-                </button>
-            </div>
-        </div>
-    `;
-
-    document.getElementById("retry-btn").addEventListener("click", () => {
-      startQuiz(state.currentCategory);
-    });
-
-    elements.views.score.classList.add("fade-in");
-  }
-
-  function setNextQuestion() {
-    resetState();
-    if (state.currentQuestionIndex < state.questions.length) {
-      showQuestion(state.questions[state.currentQuestionIndex]);
-      updateProgress();
-    } else {
-      showScoreView();
-    }
-  }
-
-  function updateProgress() {
-    const progress =
-      ((state.currentQuestionIndex + 1) / state.questions.length) * 100;
-    elements.quiz.progress.bar.style.width = `${progress}%`;
-    elements.quiz.progress.current.textContent = state.currentQuestionIndex + 1;
-  }
-
   function showLoader() {
     elements.quiz.loader.classList.remove("hide");
   }
 
   function hideLoader() {
     elements.quiz.loader.classList.add("hide");
+  }
+
+  // Initialize Event Listeners
+  function initializeEventListeners() {
+    elements.buttons.back.addEventListener("click", showCategories);
+    elements.buttons.next.addEventListener("click", () => {
+      state.currentQuestionIndex++;
+      setNextQuestion();
+    });
+    elements.buttons.retry.addEventListener("click", () => {
+      state.currentCategory
+        ? startQuiz(state.currentCategory)
+        : showCategories();
+    });
   }
 
   // Initialize App

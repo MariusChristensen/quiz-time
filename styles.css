@@ -1,12 +1,12 @@
-/* Variables */
+/* 1. CSS Variables */
 :root {
-  --primary-color: #0891b2;
-  --primary-variant: #0e7490;
-  --secondary-color: #6366f1;
-  --background-color: #f0fdff;
+  --primary-color: #0891b2; /* Teal */
+  --primary-variant: #0e7490; /* Dark teal */
+  --secondary-color: #6366f1; /* Indigo */
+  --background-color: #f0fdff; /* Light cyan */
   --surface-color: #ffffff;
-  --error-color: #f43f5e;
-  --success-color: #34d399;
+  --error-color: #f43f5e; /* Coral red */
+  --success-color: #34d399; /* Bright mint green */
   --on-primary: #ffffff;
   --on-secondary: #000000;
   --on-background: #000000;
@@ -14,7 +14,7 @@
   --on-error: #ffffff;
 }
 
-/* Base Styles */
+/* 2. Base Styles */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -43,7 +43,7 @@ body {
   margin: 40px auto;
 }
 
-/* Typography */
+/* 3. Typography */
 h1 {
   color: var(--primary-color);
   margin-bottom: 32px;
@@ -70,7 +70,19 @@ h2 {
   letter-spacing: -0.3px;
 }
 
-/* Layout Components */
+#question {
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: var(--on-surface);
+  line-height: 1.4;
+  margin-bottom: 24px;
+  padding: 16px 24px;
+  background: rgba(98, 0, 238, 0.03);
+  border-radius: 12px;
+  border-left: 4px solid var(--primary-color);
+}
+
+/* 4. Grid Layouts */
 .categories-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -78,6 +90,15 @@ h2 {
   padding: 20px 0;
 }
 
+.btn-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 20px 0;
+  padding: 0 12px;
+}
+
+/* 5. Category Cards */
 .category-card {
   background: var(--surface-color);
   border-radius: 16px;
@@ -91,7 +112,6 @@ h2 {
   text-align: center;
   position: relative;
   min-height: 160px;
-  cursor: pointer;
 }
 
 .category-card::before {
@@ -110,14 +130,14 @@ h2 {
   transition: opacity 0.3s ease;
 }
 
-.category-card:hover::before {
-  opacity: 1;
-}
-
 .category-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(98, 0, 238, 0.1);
   border-color: var(--primary-color);
+}
+
+.category-card:hover::before {
+  opacity: 1;
 }
 
 .category-card .material-icons {
@@ -146,29 +166,7 @@ h2 {
   letter-spacing: 0.3px;
 }
 
-.category-card.dragging {
-  opacity: 0.5;
-  cursor: grabbing;
-}
-
-.drag-handle {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  color: #ccc;
-  cursor: move;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-/* Optional: Hide drag handle on mobile */
-@media (max-width: 768px) {
-  .drag-handle {
-    display: none;
-  }
-}
-
-/* UI Components */
+/* 6. Buttons */
 .btn {
   padding: 12px 24px;
   border: none;
@@ -214,28 +212,6 @@ h2 {
   animation: wrongShake 0.4s ease;
 }
 
-.back-btn {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  background-color: transparent;
-  color: var(--primary-color);
-  box-shadow: none;
-}
-
-.back-btn:hover {
-  background-color: rgba(98, 0, 238, 0.04);
-}
-
-/* Quiz Components */
-.btn-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  margin: 20px 0;
-  padding: 0 12px;
-}
-
 .btn-grid .btn {
   text-align: left;
   justify-content: flex-start;
@@ -255,26 +231,20 @@ h2 {
   color: inherit;
 }
 
-#question {
-  font-size: 1.4rem;
-  font-weight: 500;
-  color: var(--on-surface);
-  line-height: 1.4;
-  margin-bottom: 24px;
-  padding: 16px 24px;
-  background: rgba(98, 0, 238, 0.03);
-  border-radius: 12px;
-  border-left: 4px solid var(--primary-color);
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background-color: transparent;
+  color: var(--primary-color);
+  box-shadow: none;
 }
 
-.controls {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 20px;
-  padding: 0 12px;
+.back-btn:hover {
+  background-color: rgba(98, 0, 238, 0.04);
 }
 
-/* Progress Bar */
+/* 7. Progress Bar */
 .progress-bar {
   width: 100%;
   height: 6px;
@@ -302,7 +272,7 @@ h2 {
   margin-top: 8px;
 }
 
-/* Score View */
+/* 8. Score View */
 .score-circle {
   position: relative;
   width: 180px;
@@ -356,6 +326,16 @@ h2 {
   margin-top: 8px;
 }
 
+.score-details {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.score-details p {
+  margin: 0;
+}
+
+/* 9. Feedback */
 .feedback {
   margin: 24px 0;
   padding: 16px;
@@ -380,7 +360,43 @@ h2 {
   font-weight: 500;
 }
 
-/* Loader */
+/* 10. Edit Mode */
+.edit-toggle {
+  margin-bottom: 20px;
+  background-color: var(--surface-color);
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+}
+
+.edit-toggle:hover {
+  background-color: var(--primary-color);
+  color: var(--surface-color);
+}
+
+.drag-handle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: #ccc;
+  cursor: move;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.edit-mode .category-card {
+  cursor: move;
+}
+
+.edit-mode .drag-handle {
+  opacity: 1;
+}
+
+.category-card.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+/* 11. Loader */
 .loader {
   width: 48px;
   height: 48px;
@@ -391,12 +407,27 @@ h2 {
   margin: 40px auto;
 }
 
-/* Utility Classes */
-.hide {
-  display: none;
+/* 12. Controls */
+.controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding: 0 12px;
 }
 
-/* Animations */
+.retry-button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+#retry-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 13. Animations */
 @keyframes loader-spin {
   to {
     transform: rotate(360deg);
@@ -450,29 +481,7 @@ h2 {
   }
 }
 
-.retry-button-container {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 24px;
-}
-
-#retry-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.score-details {
-  text-align: center;
-  margin-top: 24px;
-}
-
-/* Remove the old category styling */
-.score-details p {
-  margin: 0;
-}
-
-/* Make question grid single column on mobile */
+/* 14. Media Queries */
 @media (max-width: 768px) {
   .btn-grid {
     grid-template-columns: 1fr;
@@ -480,26 +489,22 @@ h2 {
     padding: 0 8px;
   }
 
-  /* Adjust question text size */
   #question {
     font-size: 1.2rem;
     padding: 12px 16px;
   }
 
-  /* Make category grid single column earlier */
   .categories-grid {
     grid-template-columns: 1fr;
     gap: 16px;
     padding: 16px 0;
   }
 
-  /* Adjust score circle size */
   .score-circle {
     width: 150px;
     height: 150px;
   }
 
-  /* Adjust headings */
   h1 {
     font-size: 2rem;
     margin-bottom: 24px;
@@ -509,53 +514,24 @@ h2 {
     font-size: 1.5rem;
   }
 
-  /* Adjust back button position */
   .back-btn {
     position: relative;
     top: 0;
     left: 0;
     margin-bottom: 16px;
   }
-}
 
-.edit-toggle {
-  margin-bottom: 20px;
-  background-color: var(--surface-color);
-  color: var(--primary-color);
-  border: 2px solid var(--primary-color);
-}
-
-.edit-toggle:hover {
-  background-color: var(--primary-color);
-  color: var(--surface-color);
-}
-
-.drag-handle {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  color: #ccc;
-  cursor: move;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.edit-mode .category-card {
-  cursor: move;
-}
-
-.edit-mode .drag-handle {
-  opacity: 1;
-}
-
-.category-card.dragging {
-  opacity: 0.5;
-  cursor: grabbing;
-}
-
-@media (max-width: 768px) {
   .edit-toggle {
     width: 100%;
     margin-bottom: 16px;
   }
+
+  .drag-handle {
+    display: none;
+  }
+}
+
+/* 15. Utility Classes */
+.hide {
+  display: none;
 }

@@ -4,13 +4,15 @@ A sleek, Material Design quiz application that pulls questions from the Open Tri
 
 ## ✨ Features
 
-- 🎨 Modern Material Design UI
-- 📚 24+ Quiz Categories
+- 🎨 Modern Ocean-themed UI with Material Design
+- 📚 24+ Quiz Categories with customizable order
 - 🎮 "Who Wants to Be a Millionaire" style answer format (A, B, C, D)
+- 🔄 Drag-and-drop category reordering
+- 💾 Persistent category order saves your preferences
 - ✨ Smooth animations and transitions
 - ✅ Immediate feedback with color-coded answers
 - 📊 Progress tracking
-- 🏆 Dynamic score feedback with fun messages
+- 🏆 Dynamic score feedback with personalized messages
 - 📱 Fully responsive design
 - 🔄 Quick restart option
 
@@ -22,6 +24,7 @@ A sleek, Material Design quiz application that pulls questions from the Open Tri
 - Animated score reveal
 - Personalized feedback based on score
 - Category-specific icons
+- Customizable category order
 
 ## 🛠️ Built With
 
